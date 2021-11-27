@@ -6,7 +6,7 @@
 #include "LevelEditor.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Layout/SBox.h"
-#include "Widgets/Text/STextBlock.h"
+#include "SMinesweeperWidget.h"
 #include "ToolMenus.h"
 
 static const FName MinesweeperTabName("Minesweeper");
@@ -54,12 +54,6 @@ void FMinesweeperModule::ShutdownModule()
 
 TSharedRef<SDockTab> FMinesweeperModule::OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs)
 {
-	FText WidgetText = FText::Format(
-		LOCTEXT("WindowWidgetText", "Add code to {0} in {1} to override this window's contents"),
-		FText::FromString(TEXT("FMinesweeperModule::OnSpawnPluginTab")),
-		FText::FromString(TEXT("Minesweeper.cpp"))
-		);
-
 	return SNew(SDockTab)
 		.TabRole(ETabRole::NomadTab)
 		[
@@ -68,8 +62,7 @@ TSharedRef<SDockTab> FMinesweeperModule::OnSpawnPluginTab(const FSpawnTabArgs& S
 			.HAlign(HAlign_Center)
 			.VAlign(VAlign_Center)
 			[
-				SNew(STextBlock)
-				.Text(WidgetText)
+				SNew(SMinesweeperWidget)
 			]
 		];
 }
