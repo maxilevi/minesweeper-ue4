@@ -19,12 +19,11 @@ void FMinesweeperGame::InitializeGrid()
 		Grid[i] = new FMinesweeperCell[Height_];
 		for(auto j = 0; j < Height_; ++j)
 		{
-			Grid[i][j] = FMinesweeperCell
-			{
-				.Visible = false,
-				.NeighbourMines = 0,
-				.Type = ECellType::Normal,
-			};
+			FMinesweeperCell Cell;
+			Cell.NeighbourMines = 0;
+			Cell.Type = Normal;
+			Cell.Visible = false;
+			Grid[i][j] = Cell;
 		}
 	}
 }
@@ -37,8 +36,8 @@ void FMinesweeperGame::MarkMines()
 	auto Mines = 0;
 	while (Mines < MineCount_)
 	{
-		const int32 X = FMath::RandRange(0, Width_);
-		const int32 Y = FMath::RandRange(0, Height_);
+		const int32 X = FMath::RandRange(0, Width_-1);
+		const int32 Y = FMath::RandRange(0, Height_-1);
 		if (Grid[X][Y].Type == Mine)
 			continue;
 		
@@ -70,15 +69,18 @@ EMinesweeperState FMinesweeperGame::Open(int X, int Y)
 void FMinesweeperGame::OpenRecursively(int32 X, int32 Y)
 {
 	/* This is basically a simple flood fill / dfs */
-	if (X < 0 || X == Width_ || Y < 0 || Y == Height_ || Grid[X][Y].Type == Mine)
+	if (X < 0 || X == Width_ || Y < 0 || Y == Height_ || Grid[X][Y].Type == Mine || Grid[X][Y].Visible)
 		return;
 	
 	Grid[X][Y].Visible = true;
 	CellsLeft_--;
-	OpenRecursively(X-1, Y);
-	OpenRecursively(X+1, Y);
-	OpenRecursively(X, Y+1);
-	OpenRecursively(X, Y+1);
+	if (Grid[X][Y].NeighbourMines == 0)
+	{
+		OpenRecursively(X-1, Y);
+		OpenRecursively(X+1, Y);
+		OpenRecursively(X, Y-1);
+		OpenRecursively(X, Y+1);
+	}
 }
 
 inline FMinesweeperCell FMinesweeperGame::CellAt(int32 X, int32 Y) const
