@@ -6,6 +6,7 @@
 #include "SlateOptMacros.h"
 #include "Widgets/Input/SSpinBox.h"
 #include "Widgets/Layout/SUniformGridPanel.h"
+#include "EditorStyleSet.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -13,6 +14,7 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 const FLinearColor GNeighbourCountToColor[] = {
 	FLinearColor::Green,
 	FLinearColor::Yellow,
+	FLinearColor::Red,
 	FLinearColor::Red,
 };
 
@@ -35,6 +37,7 @@ void CreateConfiguration(const TSharedRef<SHorizontalBox>& Box, const TAttribute
 			[
 				SNew(SSpinBox<int32>)
 				.Value(Value)
+				.MinValue(1)
 				.OnValueChanged(OnValueChanged)
 			]
 		];
@@ -68,7 +71,11 @@ void SMinesweeperWidget::Construct(const FArguments& InArgs)
 			.AutoHeight()
 			.Padding(8)
 			[
-				GridBox.ToSharedRef()
+				SNew(SBorder)
+				.ColorAndOpacity(FLinearColor::White)
+				[
+					GridBox.ToSharedRef()
+				]
 			]
 			
 			+ SVerticalBox::Slot()
@@ -102,14 +109,21 @@ TSharedRef<SWidget> SMinesweeperWidget::GetSlateElementFromCell(const FMinesweep
 		return SNew(SButton)
 			.OnClicked(FOnClicked::CreateSP(this, &SMinesweeperWidget::OnGridClicked, X, Y));
 	}
-
+	if (Cell.Type == Mine)
+	{
+		return SNew(SImage)
+			.Image(FEditorStyle::GetBrush("BTEditor.DebuggerOverlay.Breakpoint.Enabled"));
+	}
 	if (Cell.NeighbourMines == 0)
 	{
-		return SNew(STextBlock);
+		return SNew(SImage)
+		.ColorAndOpacity(FSlateColor(FLinearColor::Transparent));
 	}
 	
 	return SNew(STextBlock)
 		.Justification(ETextJustify::Center)
+		.Margin(FMargin(0, 8, 0, 0))
+		.Font(FCoreStyle::GetDefaultFontStyle("Bold", 11))
 		.ColorAndOpacity(FSlateColor(GNeighbourCountToColor[Cell.NeighbourMines-1]))
 		.Text(FText::AsNumber(Cell.NeighbourMines));
 }
@@ -135,8 +149,14 @@ void SMinesweeperWidget::UpdateGrid()
 
 FReply SMinesweeperWidget::OnGenerateClicked()
 {
-	CreateNewGame();
-	UpdateGrid();
+	if (SelectedMines > SelectedWidth * SelectedHeight)
+	{
+		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("MoreMines", "Minesweeper cannot have more mines than cells"));
+	} else
+	{
+		CreateNewGame();
+		UpdateGrid();
+	}
 	return FReply::Handled();
 }
 
@@ -144,15 +164,15 @@ FReply SMinesweeperWidget::OnGenerateClicked()
 FReply SMinesweeperWidget::OnGridClicked(int32 X, int32 Y)
 {
 	const auto State = Game->Open(X, Y);
+	UpdateGrid();
 	if (State == GameLost || State == GameWon)
 	{
 		const auto DialogMsg = State == GameLost
-			? LOCTEXT("Lost", "You have lost :(")
-			: LOCTEXT("Won", "You have won");
+			? LOCTEXT("Lost", "You have lost.")
+			: LOCTEXT("Won", "You have won!");
 		FMessageDialog::Open(EAppMsgType::Ok, DialogMsg);
 	}
 	
-	UpdateGrid();
 	return FReply::Handled();
 }
 
