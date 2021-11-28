@@ -8,7 +8,7 @@
 #include "Widgets/Layout/SUniformGridPanel.h"
 
 /**
- * 
+ * Widget for the Minesweeper
  */
 class MINESWEEPER_API SMinesweeperWidget : public SCompoundWidget
 {
@@ -22,6 +22,7 @@ public:
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
+	/** Destroys de widget and deletes allocated heap memory */
 	void Destruct();
 private:
 	const int GDefault_Width = 8;

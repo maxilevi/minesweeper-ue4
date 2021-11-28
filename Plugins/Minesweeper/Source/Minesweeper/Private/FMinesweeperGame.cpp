@@ -30,7 +30,10 @@ void FMinesweeperGame::InitializeGrid()
 void FMinesweeperGame::MarkMines()
 {
 	if (MineCount_ > CellsLeft_)
-		return; // throw something
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to populate Minesweeper because there are more mines than empty cells."));
+		return;
+	}
 
 	auto Mines = 0;
 	while (Mines < MineCount_)

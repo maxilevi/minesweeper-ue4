@@ -11,6 +11,7 @@
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 #define LOCTEXT_NAMESPACE "MinesweeperWidget"
+/* Color map for when a cell has neighbouring mines */
 const FLinearColor GNeighbourCountToColor[] = {
 	FLinearColor::Green,
 	FLinearColor::Yellow,
@@ -19,6 +20,7 @@ const FLinearColor GNeighbourCountToColor[] = {
 };
 
 
+/* Creates a Slate Spinbox with a title, a value and a delegate */
 void CreateConfiguration(const TSharedRef<SHorizontalBox>& Box, const TAttribute<FText>& Text, int32 Value, FOnInt32ValueChanged OnValueChanged)
 {
 	Box->AddSlot()
@@ -102,6 +104,7 @@ void SMinesweeperWidget::CreateNewGame()
 	Game = new FMinesweeperGame(SelectedWidth, SelectedHeight, SelectedMines);
 }
 
+/** Creates the corresponding element depending on the cell type and state */
 TSharedRef<SWidget> SMinesweeperWidget::GetSlateElementFromCell(const FMinesweeperCell& Cell, int32 X, int32 Y)
 {
 	if (!Cell.Visible)
@@ -119,7 +122,8 @@ TSharedRef<SWidget> SMinesweeperWidget::GetSlateElementFromCell(const FMinesweep
 		return SNew(SImage)
 		.ColorAndOpacity(FSlateColor(FLinearColor::Transparent));
 	}
-	
+
+	// The cell has neighbour mines so we create a colored text to indicate it.
 	return SNew(STextBlock)
 		.Justification(ETextJustify::Center)
 		.Margin(FMargin(0, 8, 0, 0))
