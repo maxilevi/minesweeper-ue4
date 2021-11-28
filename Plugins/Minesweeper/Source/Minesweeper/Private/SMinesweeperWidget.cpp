@@ -19,41 +19,6 @@ const FLinearColor GNeighbourCountToColor[] = {
 	FLinearColor::Red,
 };
 
-
-/* Creates a Slate Spinbox with a title, a value and a delegate */
-void CreateConfiguration(const TSharedRef<SHorizontalBox>& Box, const TAttribute<FText>& Text, int32 Value, FOnInt32ValueChanged OnValueChanged)
-{
-	Box->AddSlot()
-		.AutoWidth()
-		.Padding(4)
-		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			[
-				SNew(STextBlock)
-				.Text(Text)
-			]
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			[
-				SNew(SSpinBox<int32>)
-				.Value(Value)
-				.MinValue(1)
-				.OnValueChanged(OnValueChanged)
-			]
-		];
-}
-
-TSharedRef<SWidget> SMinesweeperWidget::GetHeaderWidgets()
-{
-	auto Box = SNew(SHorizontalBox);
-	CreateConfiguration(Box, LOCTEXT("GridWidth", "Grid Width"), GDefault_Width, FOnInt32ValueChanged::CreateSP(this, &SMinesweeperWidget::OnWidthChanged));
-	CreateConfiguration(Box, LOCTEXT("GridHeight", "Grid Height"), GDefault_Height, FOnInt32ValueChanged::CreateSP(this, &SMinesweeperWidget::OnHeightChanged));
-	CreateConfiguration(Box, LOCTEXT("NumberOfMines", "Number of Mines"), GDefault_Mines, FOnInt32ValueChanged::CreateSP(this, &SMinesweeperWidget::OnMinesChanged));
-	return Box;
-}
-
 void SMinesweeperWidget::Construct(const FArguments& InArgs)
 {
 	SAssignNew(GridBox, SUniformGridPanel);
@@ -90,11 +55,46 @@ void SMinesweeperWidget::Construct(const FArguments& InArgs)
 	];
 }
 
-void SMinesweeperWidget::Destruct()
+SMinesweeperWidget::~SMinesweeperWidget()
 {
+	/* Free the memory when the widget is deleted */
 	if (Game != nullptr)
 		delete Game;
 	Game = nullptr;
+}
+
+/* Creates a Slate Spinbox with a title, a value and a delegate */
+void CreateConfiguration(const TSharedRef<SHorizontalBox>& Box, const TAttribute<FText>& Text, int32 Value, FOnInt32ValueChanged OnValueChanged)
+{
+	Box->AddSlot()
+		.AutoWidth()
+		.Padding(4)
+		[
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			[
+				SNew(STextBlock)
+				.Text(Text)
+			]
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			[
+				SNew(SSpinBox<int32>)
+				.Value(Value)
+				.MinValue(1)
+				.OnValueChanged(OnValueChanged)
+			]
+		];
+}
+
+TSharedRef<SWidget> SMinesweeperWidget::GetHeaderWidgets()
+{
+	auto Box = SNew(SHorizontalBox);
+	CreateConfiguration(Box, LOCTEXT("GridWidth", "Grid Width"), GDefault_Width, FOnInt32ValueChanged::CreateSP(this, &SMinesweeperWidget::OnWidthChanged));
+	CreateConfiguration(Box, LOCTEXT("GridHeight", "Grid Height"), GDefault_Height, FOnInt32ValueChanged::CreateSP(this, &SMinesweeperWidget::OnHeightChanged));
+	CreateConfiguration(Box, LOCTEXT("NumberOfMines", "Number of Mines"), GDefault_Mines, FOnInt32ValueChanged::CreateSP(this, &SMinesweeperWidget::OnMinesChanged));
+	return Box;
 }
 
 void SMinesweeperWidget::CreateNewGame()
@@ -134,6 +134,7 @@ TSharedRef<SWidget> SMinesweeperWidget::GetSlateElementFromCell(const FMinesweep
 
 void SMinesweeperWidget::UpdateGrid()
 {
+	/* Update the grid of buttons depending on the state of the cell */
 	GridBox->ClearChildren();
 	GridBox->SetMinDesiredSlotHeight(2);
 	GridBox->SetMinDesiredSlotWidth(2);
@@ -150,6 +151,8 @@ void SMinesweeperWidget::UpdateGrid()
 		}
 	}
 }
+
+/* Event handlers */
 
 FReply SMinesweeperWidget::OnGenerateClicked()
 {

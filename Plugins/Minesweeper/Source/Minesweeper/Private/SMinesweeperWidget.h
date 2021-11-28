@@ -23,7 +23,7 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 	/** Destroys de widget and deletes allocated heap memory */
-	void Destruct();
+	virtual ~SMinesweeperWidget() override;
 private:
 	const int GDefault_Width = 8;
 	const int GDefault_Height = 8;
