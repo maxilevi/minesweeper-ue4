@@ -5,10 +5,9 @@ FMinesweeperGame::FMinesweeperGame(int Width, int Height, int MineCount)
 	this->Width_ = Width;
 	this->Height_ = Height;
 	this->MineCount_ = MineCount;
-	
+	this->CellsLeft_ = Width * Height;
 	InitializeGrid();
 	MarkMines();
-	CellsLeft_ = Width * Height;
 }
 
 void FMinesweeperGame::InitializeGrid()
@@ -59,11 +58,20 @@ EMinesweeperState FMinesweeperGame::Open(int X, int Y)
 {
 	const auto Cell = Grid[X][Y];
 	if (Cell.Type == Mine)
+	{
+		MakeAllVisible();
 		return GameLost;
+	}
 
 	OpenRecursively(X, Y);
+
+	if (CellsLeft_ == MineCount_)
+	{
+		MakeAllVisible();
+		return GameWon;
+	}
 	
-	return CellsLeft_ == MineCount_ ? GameWon : GameInProgress;
+	return GameInProgress;
 }
 
 void FMinesweeperGame::OpenRecursively(int32 X, int32 Y)
@@ -80,6 +88,17 @@ void FMinesweeperGame::OpenRecursively(int32 X, int32 Y)
 		OpenRecursively(X+1, Y);
 		OpenRecursively(X, Y-1);
 		OpenRecursively(X, Y+1);
+	}
+}
+
+void FMinesweeperGame::MakeAllVisible()
+{
+	for(auto i = 0; i < Width_; ++i)
+	{
+		for(auto j = 0; j < Height_; ++j)
+		{
+			Grid[i][j].Visible = true;
+		}
 	}
 }
 

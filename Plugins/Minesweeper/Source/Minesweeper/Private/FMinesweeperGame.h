@@ -44,12 +44,13 @@ public:
 	
 private:
 	void InitializeGrid();
+	void MakeAllVisible();
 	void MarkMines();
 	void OpenRecursively(int32 X, int32 Y);
 	
 	FMinesweeperCell** Grid;
-	int32 Width_;
-	int32 Height_;
-	int32 MineCount_;
-	int32 CellsLeft_;
+	int32 Width_ = 0;
+	int32 Height_ = 0;
+	int32 MineCount_ = 0;
+	int32 CellsLeft_ = 0;
 };
