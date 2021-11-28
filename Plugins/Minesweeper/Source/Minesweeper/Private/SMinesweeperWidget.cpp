@@ -72,30 +72,50 @@ void SMinesweeperWidget::Construct(const FArguments& InArgs)
 			.AutoHeight()
 			[
 				SNew(SButton)
-				.Text(LOCTEXT("MinesweeperNew", "New game"))
+				.Text(LOCTEXT("MinesweeperNew", "Create new game"))
 				.OnClicked(this, &SMinesweeperWidget::OnGenerateClicked)
 			]
 	];
+}
+
+void SMinesweeperWidget::Destruct()
+{
+	if (Game != nullptr)
+		delete Game;
+	Game = nullptr;
 }
 
 void SMinesweeperWidget::CreateNewGame()
 {
 	if (Game != nullptr)
 		delete Game;
-	Game = new FMinesweeperGame(4, 4);
+	Game = new FMinesweeperGame(4, 4, 4);
+}
+
+TSharedRef<SWidget> SMinesweeperWidget::GetSlateElementFromCell(const FMinesweeperCell& Cell, int32 X, int32 Y)
+{
+	if (!Cell.Visible)
+	{
+		return SNew(SButton)
+			.OnClicked(FOnClicked::CreateSP(this, &SMinesweeperWidget::OnGridClicked, X, Y));
+	}
+	// Test bomb, and if not bomb then neighbours or nothing
+	return SNew(STextBlock)
+		.Text("a");
 }
 
 void SMinesweeperWidget::UpdateGrid()
 {
 	GridBox->ClearChildren();
-	for(auto x = 0; x < 8; ++x)
+	for(auto x = 0; x < Game->Width(); ++x)
 	{
-		for(auto y = 0; y < 8; ++y)
+		for(auto y = 0; y < Game->Height(); ++y)
 		{
+			const auto Cell = Game->CellAt(x, y);
+			auto CellInterface = GetSlateElementFromCell(Cell, x, y);
 			GridBox->AddSlot(x, y)
 			[
-				SNew(SButton)
-				.OnClicked(FOnClicked::CreateSP(this, &SMinesweeperWidget::OnGridClicked, x, y))
+				CellInterface
 			];
 		}
 	}
@@ -103,15 +123,24 @@ void SMinesweeperWidget::UpdateGrid()
 
 FReply SMinesweeperWidget::OnGenerateClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("I just started running"));
+	CreateNewGame();
+	UpdateGrid();
 	return FReply::Handled();
 }
 
 
 FReply SMinesweeperWidget::OnGridClicked(int32 X, int32 Y)
 {
-	//FMessageDialog::Open(EAppMsgType::Ok, FText::Format(LOCTEXT("a", "You clicked button {0}, {1}"), X, Y));
-	//FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("Lost", "You have lost :("));
+	const auto State = Game->Open(X, Y);
+	if (State == GameLost || State == GameWon)
+	{
+		const auto DialogMsg = State == GameLost
+			? LOCTEXT("Lost", "You have lost :(")
+			: LOCTEXT("Won", "You have won");
+		FMessageDialog::Open(EAppMsgType::Ok, DialogMsg);
+	}
+	
+	UpdateGrid();
 	return FReply::Handled();
 }
 
