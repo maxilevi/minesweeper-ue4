@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MinesweeperGame.h"
 #include "Widgets/SCompoundWidget.h"
+#include "Widgets/Layout/SUniformGridPanel.h"
 
 /**
  * 
@@ -21,4 +23,11 @@ public:
 	void Construct(const FArguments& InArgs);
 
 	FReply OnGenerateClicked();
+	FReply OnGridClicked(int32 X, int32 Y);
+private:
+	void UpdateGrid();
+	void CreateNewGame();
+	TSharedRef<SWidget> GetHeaderWidgets();
+	TSharedRef<SUniformGridPanel> GridBox;
+	FMinesweeperGame* Game;
 };
